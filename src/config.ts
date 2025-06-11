@@ -33,11 +33,7 @@ export const additionalEnvironmentVariables: AdditionalConfig[] = [
     type: 'string',
     optional: true,
   },
-  {
-    name: 'NODE_ENV',
-    type: 'string',
-    optional: true,
-  },
+  
 ];
 
 export type Configuration = ProcessorConfig & ExtendedConfig;
