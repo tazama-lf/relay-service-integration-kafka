@@ -12,7 +12,6 @@ export interface ExtendedConfig {
   PRODUCER_STREAM: string;
   KAFKA_TLS_CA: string;
   CLIENT_ID?: string;
-  NODE_ENV?: string;
 }
 
 export const additionalEnvironmentVariables: AdditionalConfig[] = [
@@ -33,7 +32,6 @@ export const additionalEnvironmentVariables: AdditionalConfig[] = [
     type: 'string',
     optional: true,
   },
-  
 ];
 
 export type Configuration = ProcessorConfig & ExtendedConfig;

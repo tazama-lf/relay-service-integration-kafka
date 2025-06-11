@@ -20,15 +20,14 @@ export default class KafkaRelayPlugin implements ITransportPlugin {
     this.configuration = validateProcessorConfig(additionalEnvironmentVariables) as Configuration;
 
     // Use only CA_CERT for TLS
-    const isDev = (this.configuration.NODE_ENV ?? process.env.NODE_ENV ?? 'dev') === 'dev';
+    const isDev = (this.configuration.nodeEnv ?? 'dev') === 'dev';
 
     const ssl = isDev
       ? false
       : {
-        rejectUnauthorized: false,
-        ca: this.configuration.KAFKA_TLS_CA ? [this.configuration.KAFKA_TLS_CA] : [],
-      };
-
+          rejectUnauthorized: false,
+          ca: this.configuration.KAFKA_TLS_CA ? [this.configuration.KAFKA_TLS_CA] : [],
+        };
 
     this.kafka = new Kafka({
       clientId: this.configuration.CLIENT_ID ?? 'relay-plugin',
