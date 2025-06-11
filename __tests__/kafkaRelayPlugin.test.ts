@@ -13,11 +13,12 @@ describe('KafkaRelayPlugin', () => {
   let mockProducer: any;
   let mockApm: any;
 
+  // Use lower-case nodeEnv to match actual config!
   const makeConfig = (overrides = {}) => ({
     CLIENT_ID: 'test-client',
     DESTINATION_TRANSPORT_URL: 'localhost:9092',
     PRODUCER_STREAM: 'test-topic',
-    NODE_ENV: 'prod',
+    nodeEnv: 'prod',
     KAFKA_TLS_CA: 'FAKE_CA_CERT',
     ...overrides,
   });
@@ -64,7 +65,7 @@ describe('KafkaRelayPlugin', () => {
     it('should not use SSL in dev', async () => {
       jest.resetModules();
       jest.doMock('@tazama-lf/frms-coe-lib/lib/config/processor.config', () => ({
-        validateProcessorConfig: jest.fn(() => makeConfig({ NODE_ENV: 'dev', KAFKA_TLS_CA: undefined })),
+        validateProcessorConfig: jest.fn(() => makeConfig({ nodeEnv: 'dev', KAFKA_TLS_CA: undefined })),
       }));
 
       const Kafka = require('kafkajs').Kafka;
@@ -82,7 +83,7 @@ describe('KafkaRelayPlugin', () => {
     it('should use only CA for SSL in prod', async () => {
       jest.resetModules();
       jest.doMock('@tazama-lf/frms-coe-lib/lib/config/processor.config', () => ({
-        validateProcessorConfig: jest.fn(() => makeConfig({ NODE_ENV: 'prod', KAFKA_TLS_CA: 'FAKE_CA_CERT' })),
+        validateProcessorConfig: jest.fn(() => makeConfig({ nodeEnv: 'prod', KAFKA_TLS_CA: 'FAKE_CA_CERT' })),
       }));
 
       const Kafka = require('kafkajs').Kafka;
@@ -102,7 +103,7 @@ describe('KafkaRelayPlugin', () => {
     it('should use empty CA array if KAFKA_TLS_CA missing', async () => {
       jest.resetModules();
       jest.doMock('@tazama-lf/frms-coe-lib/lib/config/processor.config', () => ({
-        validateProcessorConfig: jest.fn(() => makeConfig({ NODE_ENV: 'prod', KAFKA_TLS_CA: undefined })),
+        validateProcessorConfig: jest.fn(() => makeConfig({ nodeEnv: 'prod', KAFKA_TLS_CA: undefined })),
       }));
 
       const Kafka = require('kafkajs').Kafka;
