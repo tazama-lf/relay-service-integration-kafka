@@ -10,8 +10,8 @@ dotenv.config({
 export interface ExtendedConfig {
   DESTINATION_TRANSPORT_URL: string;
   PRODUCER_STREAM: string;
-  KAFKA_TLS_CA: string;
-  CLIENT_ID?: string;
+  KAFKA_TLS_CA?: string;
+  CLIENT_ID: string;
 }
 
 export const additionalEnvironmentVariables: AdditionalConfig[] = [
@@ -26,11 +26,11 @@ export const additionalEnvironmentVariables: AdditionalConfig[] = [
   {
     name: 'KAFKA_TLS_CA',
     type: 'string',
+    optional: true,
   },
   {
     name: 'CLIENT_ID',
     type: 'string',
-    optional: true,
   },
 ];
 

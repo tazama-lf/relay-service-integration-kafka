@@ -27,7 +27,7 @@ The Kafka Relay Plugin is a transport plugin that enables applications to easily
 ## Installation
 
 ```bash
-npm install kafka-relay-plugin
+npm install @tazama-lf/kafka-relay-plugin
 ```
 
 ## Configuration
@@ -53,7 +53,7 @@ KAFKA_TLS_CA=/path/to/ca.pem
 ### Basic Usage
 
 ```typescript
-import KafkaRelayPlugin from '@paysys-labs/kafka-relay-plugin';
+import KafkaRelayPlugin from '@tazama-lf/kafka-relay-plugin';
 import { LoggerService, Apm } from '@tazama-lf/frms-coe-lib';
 
 // Create logger and APM instances
@@ -77,33 +77,6 @@ await kafkaRelayPlugin.relay(binaryData);
 // For objects, you must stringify them first
 const objectData = { message: 'Hello, Kafka!', timestamp: Date.now() };
 await kafkaRelayPlugin.relay(JSON.stringify(objectData));
-```
-
-### Custom Implementation with Service Import
-
-```typescript
-import KafkaRelayPlugin from 'kafka-relay-plugin/dist/service/kafkaRelayPlugin';
-import { LoggerService, Apm } from '@tazama-lf/frms-coe-lib';
-
-// Create logger and APM instances
-const loggerService = new LoggerService();
-const apm = new Apm();
-
-// Create an instance with required dependencies
-const myKafkaRelay = new KafkaRelayPlugin(loggerService, apm);
-
-// Initialize the connection
-await myKafkaRelay.init();
-
-// Send data with metadata for APM tracing
-const data = {
-  payload: 'Important message',
-  metaData: {
-    traceParent: 'your-trace-id', // Optional: For APM trace correlation
-    messageId: 'msg-123',
-  },
-};
-await myKafkaRelay.relay(JSON.stringify(data));
 ```
 
 ## API Reference

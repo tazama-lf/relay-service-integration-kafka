@@ -5,6 +5,7 @@ import { type ITransportPlugin } from '../interfaces/ITransportPlugin';
 import type { LoggerService } from '@tazama-lf/frms-coe-lib';
 import type { Apm } from '@tazama-lf/frms-coe-lib/lib/services/apm';
 import { validateProcessorConfig } from '@tazama-lf/frms-coe-lib/lib/config/processor.config';
+import * as fs from 'fs';
 
 export default class KafkaRelayPlugin implements ITransportPlugin {
   private readonly kafka: Kafka;
@@ -20,13 +21,13 @@ export default class KafkaRelayPlugin implements ITransportPlugin {
     this.configuration = validateProcessorConfig(additionalEnvironmentVariables) as Configuration;
 
     // Use only CA_CERT for TLS
-    const isDev = (this.configuration.nodeEnv ?? 'dev') === 'dev';
+    const isDev = !this.configuration.nodeEnv || this.configuration.nodeEnv === 'dev';
 
     const ssl = isDev
       ? false
       : {
           rejectUnauthorized: false,
-          ca: this.configuration.KAFKA_TLS_CA ? [this.configuration.KAFKA_TLS_CA] : [],
+          ca: fs.existsSync(this.configuration.KAFKA_TLS_CA!) ? [fs.readFileSync(this.configuration.KAFKA_TLS_CA!)] : [],
         };
 
     this.kafka = new Kafka({

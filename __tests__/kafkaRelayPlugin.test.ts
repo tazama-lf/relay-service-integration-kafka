@@ -13,7 +13,6 @@ describe('KafkaRelayPlugin', () => {
   let mockProducer: any;
   let mockApm: any;
 
-  // Use lower-case nodeEnv to match actual config!
   const makeConfig = (overrides = {}) => ({
     CLIENT_ID: 'test-client',
     DESTINATION_TRANSPORT_URL: 'localhost:9092',
@@ -26,22 +25,10 @@ describe('KafkaRelayPlugin', () => {
   beforeEach(() => {
     jest.resetModules();
 
-    jest.doMock('@tazama-lf/frms-coe-lib/lib/config/processor.config', () => ({
-      validateProcessorConfig: jest.fn(() => makeConfig()),
-    }));
-
-    Kafka = require('kafkajs').Kafka;
-
     mockProducer = {
       connect: jest.fn(),
       send: jest.fn(),
     };
-
-    (Kafka as unknown as jest.Mock).mockImplementation(() => ({
-      producer: () => mockProducer,
-    }));
-
-    KafkaRelayPlugin = require('../src/service/kafkaRelayPlugin').default;
 
     mockLoggerService = {
       log: jest.fn(),
@@ -53,8 +40,6 @@ describe('KafkaRelayPlugin', () => {
       startSpan: jest.fn().mockReturnValue({ end: jest.fn() }),
       captureError: jest.fn(),
     };
-
-    kafkaRelayPlugin = new KafkaRelayPlugin(mockLoggerService, mockApm);
   });
 
   afterEach(() => {
@@ -63,52 +48,58 @@ describe('KafkaRelayPlugin', () => {
 
   describe('constructor SSL handling', () => {
     it('should not use SSL in dev', async () => {
-      jest.resetModules();
       jest.doMock('@tazama-lf/frms-coe-lib/lib/config/processor.config', () => ({
         validateProcessorConfig: jest.fn(() => makeConfig({ nodeEnv: 'dev', KAFKA_TLS_CA: undefined })),
       }));
 
-      const Kafka = require('kafkajs').Kafka;
-      const KafkaRelayPlugin = require('../src/service/kafkaRelayPlugin').default;
-
+      Kafka = require('kafkajs').Kafka;
       (Kafka as unknown as jest.Mock).mockImplementation(({ ssl }) => {
-        // Should be false (no SSL) in dev
         expect(ssl).toBe(false);
         return { producer: () => mockProducer };
       });
 
+      KafkaRelayPlugin = require('../src/service/kafkaRelayPlugin').default;
       new KafkaRelayPlugin(mockLoggerService, mockApm);
     });
 
     it('should use only CA for SSL in prod', async () => {
-      jest.resetModules();
-      jest.doMock('@tazama-lf/frms-coe-lib/lib/config/processor.config', () => ({
-        validateProcessorConfig: jest.fn(() => makeConfig({ nodeEnv: 'prod', KAFKA_TLS_CA: 'FAKE_CA_CERT' })),
+      const fakeCert = Buffer.from('FAKE_CA_CERT_CONTENT');
+
+      // Mock fs before requiring the plugin
+      jest.doMock('fs', () => ({
+        existsSync: jest.fn(() => true),
+        readFileSync: jest.fn(() => fakeCert),
       }));
 
-      const Kafka = require('kafkajs').Kafka;
-      const KafkaRelayPlugin = require('../src/service/kafkaRelayPlugin').default;
+      jest.doMock('@tazama-lf/frms-coe-lib/lib/config/processor.config', () => ({
+        validateProcessorConfig: jest.fn(() => makeConfig({ nodeEnv: 'prod', KAFKA_TLS_CA: '/fake/path/to/ca.cert' })),
+      }));
 
+      Kafka = require('kafkajs').Kafka;
       (Kafka as unknown as jest.Mock).mockImplementation(({ ssl }) => {
         expect(ssl).toEqual({
           rejectUnauthorized: false,
-          ca: ['FAKE_CA_CERT'],
+          ca: [fakeCert],
         });
         return { producer: () => mockProducer };
       });
 
+      KafkaRelayPlugin = require('../src/service/kafkaRelayPlugin').default;
       new KafkaRelayPlugin(mockLoggerService, mockApm);
     });
 
     it('should use empty CA array if KAFKA_TLS_CA missing', async () => {
-      jest.resetModules();
-      jest.doMock('@tazama-lf/frms-coe-lib/lib/config/processor.config', () => ({
-        validateProcessorConfig: jest.fn(() => makeConfig({ nodeEnv: 'prod', KAFKA_TLS_CA: undefined })),
+      // fs.existsSync will return false to simulate missing file
+      jest.doMock('fs', () => ({
+        existsSync: jest.fn(() => false),
+        readFileSync: jest.fn(),
       }));
 
-      const Kafka = require('kafkajs').Kafka;
-      const KafkaRelayPlugin = require('../src/service/kafkaRelayPlugin').default;
+      jest.doMock('@tazama-lf/frms-coe-lib/lib/config/processor.config', () => ({
+        validateProcessorConfig: jest.fn(() => makeConfig({ nodeEnv: 'prod', KAFKA_TLS_CA: '/missing/path/to/ca.cert' })),
+      }));
 
+      Kafka = require('kafkajs').Kafka;
       (Kafka as unknown as jest.Mock).mockImplementation(({ ssl }) => {
         expect(ssl).toEqual({
           rejectUnauthorized: false,
@@ -117,11 +108,26 @@ describe('KafkaRelayPlugin', () => {
         return { producer: () => mockProducer };
       });
 
+      KafkaRelayPlugin = require('../src/service/kafkaRelayPlugin').default;
       new KafkaRelayPlugin(mockLoggerService, mockApm);
     });
   });
 
   describe('init', () => {
+    beforeEach(() => {
+      jest.doMock('@tazama-lf/frms-coe-lib/lib/config/processor.config', () => ({
+        validateProcessorConfig: jest.fn(() => makeConfig()),
+      }));
+
+      Kafka = require('kafkajs').Kafka;
+      (Kafka as unknown as jest.Mock).mockImplementation(() => ({
+        producer: () => mockProducer,
+      }));
+
+      KafkaRelayPlugin = require('../src/service/kafkaRelayPlugin').default;
+      kafkaRelayPlugin = new KafkaRelayPlugin(mockLoggerService, mockApm);
+    });
+
     it('should initialize Kafka producer and connect', async () => {
       await kafkaRelayPlugin.init();
 
@@ -135,6 +141,17 @@ describe('KafkaRelayPlugin', () => {
     const dataObject = 'message';
 
     beforeEach(async () => {
+      jest.doMock('@tazama-lf/frms-coe-lib/lib/config/processor.config', () => ({
+        validateProcessorConfig: jest.fn(() => makeConfig()),
+      }));
+
+      Kafka = require('kafkajs').Kafka;
+      (Kafka as unknown as jest.Mock).mockImplementation(() => ({
+        producer: () => mockProducer,
+      }));
+
+      KafkaRelayPlugin = require('../src/service/kafkaRelayPlugin').default;
+      kafkaRelayPlugin = new KafkaRelayPlugin(mockLoggerService, mockApm);
       await kafkaRelayPlugin.init();
     });
 

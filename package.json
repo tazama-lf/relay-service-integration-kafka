@@ -1,5 +1,5 @@
 {
-  "name": "kafka-relay-plugin",
+  "name": "@tazama-lf/kafka-relay-plugin",
   "version": "1.0.0",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -10,8 +10,6 @@
     "clean": "npx rimraf build node_modules coverage package-lock.json",
     "build": "npx tsc",
     "test": "jest",
-    "version": "npm version patch",
-    "publish": "npm publish",
     "fix:eslint": "eslint --fix \"**/*.ts\"",
     "fix:prettier": "prettier --write \"**/*.ts\"",
     "lint": "npm run lint:eslint && npm run lint:prettier",
@@ -23,13 +21,12 @@
   },
   "keywords": [],
   "author": "Fatima Ali",
-  "license": "ISC",
+  "license": "Apache-2.0",
   "description": "",
   "dependencies": {
     "@tazama-lf/frms-coe-lib": "^5.0.0",
     "dotenv": "^16.5.0",
     "kafkajs": "^2.2.4",
-    "nats": "^2.29.3",
     "tslib": "^2.8.0"
   },
   "devDependencies": {
@@ -44,7 +41,6 @@
     "husky": "^9.1.6",
     "jest": "^29.7.0",
     "lint-staged": "^15.2.10",
-    "nodemon": "^3.1.4",
     "prettier": "^3.3.1",
     "ts-jest": "^29.2.5",
     "ts-node": "^10.9.2",
