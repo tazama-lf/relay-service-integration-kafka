@@ -38,15 +38,19 @@ The plugin uses environment variables for configuration. Create a `.env` file in
 DESTINATION_TRANSPORT_URL=localhost:9092
 PRODUCER_STREAM=example.subject
 KAFKA_TLS_CA=/path/to/ca.pem
+CLIENT_ID=your-client-id
+maxInFlightRequests= your-value
 ```
 
 ### Configuration Options
 
-| Environment Variable      | Description                              | Default Value        |
-| ------------------------- | ---------------------------------------- | -------------------- |
-| DESTINATION_TRANSPORT_URL | The URL of the Kafka server to connect to | localhost:9092       |
-| PRODUCER_STREAM           | The topic to publish messages to         | example.subject      |
-| KAFKA_TLS_CA              | Path to the Certificate Authority file   | (required for TLS)   |
+| Environment Variable      | Description                                | Default Value        |
+| ------------------------- | -------------------------------------------| -------------------- |
+| DESTINATION_TRANSPORT_URL | The URL of the Kafka server to connect to  | localhost:9092       |
+| PRODUCER_STREAM           | The topic to publish messages to           | example.subject      |
+| KAFKA_TLS_CA              | Path to the Certificate Authority file     | (required for TLS)   |
+| CLIENT_ID                 | Unique identifier for the Kafka client.    | relay-plugin         |
+| maxInFlightRequests       | Max number of unacknowledged requests sent | None                 |
 
 ## Usage
 
@@ -169,8 +173,8 @@ export interface ExtendedConfig {
   DESTINATION_TRANSPORT_URL: string;  // The URL of the Kafka server to connect to
   PRODUCER_STREAM: string;            // The topic to publish messages to
   KAFKA_TLS_CA: string;               // Certificate Authority for TLS
-  CLIENT_ID?: string;                 // Optional Kafka client ID 
-  NODE_ENV?: string;                  // Optional environment setting
+  CLIENT_ID: string;                 // Kafka client ID 
+  maxInFlightRequests: string;      // Maximum requests sent
 }
 ```
 
