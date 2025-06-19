@@ -12,6 +12,7 @@ export interface ExtendedConfig {
   PRODUCER_STREAM: string;
   KAFKA_TLS_CA?: string;
   CLIENT_ID: string;
+  maxInFlightRequests: string;
 }
 
 export const additionalEnvironmentVariables: AdditionalConfig[] = [
@@ -30,6 +31,10 @@ export const additionalEnvironmentVariables: AdditionalConfig[] = [
   },
   {
     name: 'CLIENT_ID',
+    type: 'string',
+  },
+  {
+    name: 'maxInFlightRequests',
     type: 'string',
   },
 ];
