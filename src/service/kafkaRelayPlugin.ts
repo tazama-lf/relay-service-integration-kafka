@@ -5,11 +5,8 @@ import type { LoggerService } from '@tazama-lf/frms-coe-lib';
 import type { Apm } from '@tazama-lf/frms-coe-lib/lib/services/apm';
 import { validateProcessorConfig } from '@tazama-lf/frms-coe-lib/lib/config/processor.config';
 import * as fs from 'fs';
-// import type { ITransportPlugin } from '@tazama-lf/frms-coe-lib/lib/interfaces/relay-service/ITransportPlugin';
-interface ITransportPlugin {
-  init: (loggerService?: LoggerService, apm?: Apm) => Promise<void>;
-  relay: (data: Uint8Array | string) => Promise<void>;
-}
+import type { ITransportPlugin } from '@tazama-lf/frms-coe-lib/lib/interfaces/relay-service/ITransportPlugin';
+
 export default class KafkaRelayPlugin implements ITransportPlugin {
   private readonly kafka: Kafka;
   private producer?: Producer;

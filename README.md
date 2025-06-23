@@ -1,4 +1,4 @@
-#  Kafka Relay Plugin
+# Kafka Relay Plugin
 
 A TypeScript plugin for relaying messages to Kafka, a simple, secure, and high-performance open source messaging system.
 
@@ -44,13 +44,13 @@ maxInFlightRequests= your-value
 
 ### Configuration Options
 
-| Environment Variable      | Description                                | Default Value        |
-| ------------------------- | -------------------------------------------| -------------------- |
-| DESTINATION_TRANSPORT_URL | The URL of the Kafka server to connect to  | localhost:9092       |
-| PRODUCER_STREAM           | The topic to publish messages to           | example.subject      |
-| KAFKA_TLS_CA              | Path to the Certificate Authority file     | (required for TLS)   |
-| CLIENT_ID                 | Unique identifier for the Kafka client.    | relay-plugin         |
-| maxInFlightRequests       | Max number of unacknowledged requests sent | None                 |
+| Environment Variable      | Description                                | Default Value      |
+| ------------------------- | ------------------------------------------ | ------------------ |
+| DESTINATION_TRANSPORT_URL | The URL of the Kafka server to connect to  | localhost:9092     |
+| PRODUCER_STREAM           | The topic to publish messages to           | example.subject    |
+| KAFKA_TLS_CA              | Path to the Certificate Authority file     | (required for TLS) |
+| CLIENT_ID                 | Unique identifier for the Kafka client.    | relay-plugin       |
+| maxInFlightRequests       | Max number of unacknowledged requests sent | None               |
 
 ## Usage
 
@@ -65,10 +65,10 @@ const loggerService = new LoggerService();
 const apm = new Apm();
 
 // Create plugin instance
-const kafkaRelayPlugin = new KafkaRelayPlugin(loggerService, apm);
+const kafkaRelayPlugin = new KafkaRelayPlugin();
 
 // Initialize the plugin (connects to Kafka server)
-await kafkaRelayPlugin.init();
+await kafkaRelayPlugin.init(loggerService, apm);
 
 // Create some data to send
 const stringData = 'Hello, Kafka!';
@@ -92,13 +92,14 @@ The main class that implements the `ITransportPlugin` interface.
 #### Constructor
 
 ```typescript
-constructor()
+constructor();
 ```
 
 #### Methods
 
-##### `init()`
+##### `init(loggerService?: LoggerService, apm?: Apm)`
 
+Accepts `loggerService` and `apm` as parameters.
 Initializes the connection to the Kafka server.
 
 ```typescript
@@ -164,11 +165,11 @@ Defines the extended configuration structure with optional fields.
 
 ```typescript
 export interface ExtendedConfig {
-  DESTINATION_TRANSPORT_URL: string;  // The URL of the Kafka server to connect to
-  PRODUCER_STREAM: string;            // The topic to publish messages to
-  KAFKA_TLS_CA: string;               // Certificate Authority for TLS
-  CLIENT_ID: string;                 // Kafka client ID 
-  maxInFlightRequests: string;      // Maximum requests sent
+  DESTINATION_TRANSPORT_URL: string; // The URL of the Kafka server to connect to
+  PRODUCER_STREAM: string; // The topic to publish messages to
+  KAFKA_TLS_CA: string; // Certificate Authority for TLS
+  CLIENT_ID: string; // Kafka client ID
+  maxInFlightRequests: string; // Maximum requests sent
 }
 ```
 
@@ -189,8 +190,6 @@ kafka-relay-plugin/
 ├── src/
 │   ├── config.ts           # Configuration module
 │   ├── index.ts            # Main entry point
-│   ├── interfaces/
-│   │   └── ITransportPlugin.ts  # Plugin interface definition
 │   └── service/
 │       └── kafkaRelayPlugin.ts   # Main implementation
 ├── __tests__/
