@@ -23,7 +23,7 @@ describe('KafkaRelayPlugin', () => {
 
   beforeEach(() => {
     jest.resetModules();
-    process.env.maxInFlightRequests = '5'; // ✅ REQUIRED for constructor
+    process.env.maxInFlightRequests = '5';
 
     mockProducer = {
       connect: jest.fn(),
@@ -60,7 +60,7 @@ describe('KafkaRelayPlugin', () => {
       });
 
       KafkaRelayPlugin = require('../src/service/kafkaRelayPlugin').default;
-      new KafkaRelayPlugin(mockLoggerService, mockApm);
+      new KafkaRelayPlugin(); // no constructor args now
     });
 
     it('should use CA for SSL in prod', () => {
@@ -85,7 +85,7 @@ describe('KafkaRelayPlugin', () => {
       });
 
       KafkaRelayPlugin = require('../src/service/kafkaRelayPlugin').default;
-      new KafkaRelayPlugin(mockLoggerService, mockApm);
+      new KafkaRelayPlugin();
     });
 
     it('should use empty CA array if CA file is missing', () => {
@@ -108,7 +108,7 @@ describe('KafkaRelayPlugin', () => {
       });
 
       KafkaRelayPlugin = require('../src/service/kafkaRelayPlugin').default;
-      new KafkaRelayPlugin(mockLoggerService, mockApm);
+      new KafkaRelayPlugin();
     });
   });
 
@@ -124,16 +124,14 @@ describe('KafkaRelayPlugin', () => {
       }));
 
       KafkaRelayPlugin = require('../src/service/kafkaRelayPlugin').default;
-      kafkaRelayPlugin = new KafkaRelayPlugin(mockLoggerService, mockApm);
+      kafkaRelayPlugin = new KafkaRelayPlugin(); // no constructor args
     });
 
     it('should initialize and connect the producer', async () => {
-      await kafkaRelayPlugin.init();
+      await kafkaRelayPlugin.init(mockLoggerService, mockApm);
 
       expect(mockLoggerService.log).toHaveBeenCalledWith('Initializing Kafka producer for broker: localhost:9092', 'KafkaRelayPlugin');
-
       expect(mockProducer.connect).toHaveBeenCalled();
-
       expect(mockLoggerService.log).toHaveBeenCalledWith('Kafka producer connected with maxInFlightRequests = 5', 'KafkaRelayPlugin');
     });
   });
@@ -152,15 +150,14 @@ describe('KafkaRelayPlugin', () => {
       }));
 
       KafkaRelayPlugin = require('../src/service/kafkaRelayPlugin').default;
-      kafkaRelayPlugin = new KafkaRelayPlugin(mockLoggerService, mockApm);
-      await kafkaRelayPlugin.init();
+      kafkaRelayPlugin = new KafkaRelayPlugin(); // constructor has no args
+      await kafkaRelayPlugin.init(mockLoggerService, mockApm); // pass mocks into init
     });
 
     it('should relay string data', async () => {
       await kafkaRelayPlugin.relay(dataObject);
 
       expect(mockLoggerService.log).toHaveBeenCalledWith('Sending data to Kafka topic: test-topic', 'KafkaRelayPlugin');
-
       expect(mockProducer.send).toHaveBeenCalledWith({
         topic: 'test-topic',
         messages: [{ value: dataObject }],

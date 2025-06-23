@@ -92,17 +92,8 @@ The main class that implements the `ITransportPlugin` interface.
 #### Constructor
 
 ```typescript
-constructor(loggerService: LoggerService, apm: Apm)
+constructor()
 ```
-
-- **Parameters**:
-```typescript
-constructor(loggerService: LoggerService, apm: Apm)
-```
-
-- **Parameters**:
-  - `loggerService`: An instance of LoggerService from @tazama-lf/frms-coe-lib for logging
-  - `apm`: An instance of Apm from @tazama-lf/frms-coe-lib for performance monitoring
 
 #### Methods
 
@@ -111,9 +102,12 @@ constructor(loggerService: LoggerService, apm: Apm)
 Initializes the connection to the Kafka server.
 
 ```typescript
-async init(): Promise<void>
+async init(loggerService?: LoggerService, apm?: Apm): Promise<void>
 ```
 
+- **Parameters**:
+  - `loggerService`: An instance of LoggerService from @tazama-lf/frms-coe-lib for logging
+  - `apm`: An instance of Apm from @tazama-lf/frms-coe-lib for performance monitoring
 - **Returns**: A Promise that resolves when the connection is established
 - **Functionality**:
   - Establishes connection to Kafka server using the configured server URL
@@ -158,9 +152,9 @@ The `config.ts` module loads configuration from environment variables.
 Defines the contract for transport plugins.
 
 ```typescript
-export interface ITransportPlugin {
-  init: () => Promise<void>;
-  relay: (data: Uint8Array | string) => Promise<void>;
+interface ITransportPlugin {
+  init(loggerService?: LoggerService, apm?: Apm): Promise<void>;
+  relay(data: Uint8Array | string): Promise<void>;
 }
 ```
 
