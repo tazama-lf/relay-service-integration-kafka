@@ -17,11 +17,11 @@ export interface ExtendedConfig {
 
 export const additionalEnvironmentVariables: AdditionalConfig[] = [
   {
-    name: 'DESTINATION_TRANSPORT_URL',
+    name: 'KAFKA_DESTINATION_TRANSPORT_URL',
     type: 'string',
   },
   {
-    name: 'PRODUCER_STREAM',
+    name: 'KAFKA_PRODUCER_STREAM',
     type: 'string',
   },
   {
@@ -30,12 +30,12 @@ export const additionalEnvironmentVariables: AdditionalConfig[] = [
     optional: true,
   },
   {
-    name: 'CLIENT_ID',
+    name: 'KAFKA_CLIENT_ID',
     type: 'string',
   },
   {
-    name: 'maxInFlightRequests',
-    type: 'string',
+    name: 'KAFKA_MAX_IN_FLIGHT_REQUESTS',
+    type: 'number',
   },
 ];
 
