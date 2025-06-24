@@ -43,6 +43,10 @@ export default class KafkaRelayPlugin implements ITransportPlugin {
       ssl,
       logLevel: logLevel.ERROR,
     });
+
+    this.producer = this.kafka.producer({
+      maxInFlightRequests: this.configuration.KAFKA_MAX_IN_FLIGHT_REQUESTS,
+    });
   }
 
   async init(loggerService?: LoggerService, apm?: Apm): Promise<void> {
