@@ -11,19 +11,17 @@ describe('KafkaRelayPlugin', () => {
   let mockLoggerService: jest.Mocked<LoggerService>;
   let mockProducer: any;
   let mockApm: any;
-
   const makeConfig = (overrides = {}) => ({
-    CLIENT_ID: 'test-client',
-    DESTINATION_TRANSPORT_URL: 'localhost:9092',
-    PRODUCER_STREAM: 'test-topic',
+    KAFKA_CLIENT_ID: 'test-client',
+    KAFKA_DESTINATION_TRANSPORT_URL: 'localhost:9092',
+    KAFKA_PRODUCER_STREAM: 'test-topic',
     nodeEnv: 'prod',
     KAFKA_TLS_CA: 'FAKE_CA_CERT',
+    KAFKA_MAX_IN_FLIGHT_REQUESTS: 5,
     ...overrides,
   });
-
   beforeEach(() => {
     jest.resetModules();
-    process.env.maxInFlightRequests = '5';
 
     mockProducer = {
       connect: jest.fn(),
@@ -106,9 +104,28 @@ describe('KafkaRelayPlugin', () => {
         });
         return { producer: () => mockProducer };
       });
-
       KafkaRelayPlugin = require('../src/service/kafkaRelayPlugin').default;
       new KafkaRelayPlugin();
+    });
+
+    it('should throw error when KAFKA_MAX_IN_FLIGHT_REQUESTS is invalid', () => {
+      jest.doMock('@tazama-lf/frms-coe-lib/lib/config/processor.config', () => ({
+        validateProcessorConfig: jest.fn(() => makeConfig({ KAFKA_MAX_IN_FLIGHT_REQUESTS: 0 })),
+      }));
+
+      KafkaRelayPlugin = require('../src/service/kafkaRelayPlugin').default;
+
+      expect(() => new KafkaRelayPlugin()).toThrow("Invalid or missing 'maxInFlightRequests': 0");
+    });
+
+    it('should throw error when KAFKA_MAX_IN_FLIGHT_REQUESTS is negative', () => {
+      jest.doMock('@tazama-lf/frms-coe-lib/lib/config/processor.config', () => ({
+        validateProcessorConfig: jest.fn(() => makeConfig({ KAFKA_MAX_IN_FLIGHT_REQUESTS: -5 })),
+      }));
+
+      KafkaRelayPlugin = require('../src/service/kafkaRelayPlugin').default;
+
+      expect(() => new KafkaRelayPlugin()).toThrow("Invalid or missing 'maxInFlightRequests': -5");
     });
   });
 
@@ -120,7 +137,10 @@ describe('KafkaRelayPlugin', () => {
 
       Kafka = require('kafkajs').Kafka;
       (Kafka as unknown as jest.Mock).mockImplementation(() => ({
-        producer: () => mockProducer,
+        producer: (config: any) => {
+          expect(config?.maxInFlightRequests).toBe(5);
+          return mockProducer;
+        },
       }));
 
       KafkaRelayPlugin = require('../src/service/kafkaRelayPlugin').default;
@@ -129,7 +149,6 @@ describe('KafkaRelayPlugin', () => {
 
     it('should initialize and connect the producer', async () => {
       await kafkaRelayPlugin.init(mockLoggerService, mockApm);
-
       expect(mockLoggerService.log).toHaveBeenCalledWith('Initializing Kafka producer for broker: localhost:9092', 'KafkaRelayPlugin');
       expect(mockProducer.connect).toHaveBeenCalled();
       expect(mockLoggerService.log).toHaveBeenCalledWith('Kafka producer connected with maxInFlightRequests = 5', 'KafkaRelayPlugin');

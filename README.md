@@ -35,22 +35,22 @@ npm install @tazama-lf/kafka-relay-plugin
 The plugin uses environment variables for configuration. Create a `.env` file in the root directory with the following variables:
 
 ```
-DESTINATION_TRANSPORT_URL=localhost:9092
-PRODUCER_STREAM=example.subject
+KAFKA_DESTINATION_TRANSPORT_URL=localhost:9092
+KAFKA_PRODUCER_STREAM=example.subject
 KAFKA_TLS_CA=/path/to/ca.pem
-CLIENT_ID=your-client-id
-maxInFlightRequests= your-value
+KAFKA_CLIENT_ID=your-client-id
+KAFKA_MAX_IN_FLIGHT_REQUESTS=5
 ```
 
 ### Configuration Options
 
-| Environment Variable      | Description                                | Default Value      |
-| ------------------------- | ------------------------------------------ | ------------------ |
-| DESTINATION_TRANSPORT_URL | The URL of the Kafka server to connect to  | localhost:9092     |
-| PRODUCER_STREAM           | The topic to publish messages to           | example.subject    |
-| KAFKA_TLS_CA              | Path to the Certificate Authority file     | (required for TLS) |
-| CLIENT_ID                 | Unique identifier for the Kafka client.    | relay-plugin       |
-| maxInFlightRequests       | Max number of unacknowledged requests sent | None               |
+| Environment Variable            | Description                                | Default Value      |
+| ------------------------------- | ------------------------------------------ | ------------------ |
+| KAFKA_DESTINATION_TRANSPORT_URL | The URL of the Kafka server to connect to  | localhost:9092     |
+| KAFKA_PRODUCER_STREAM           | The topic to publish messages to           | example.subject    |
+| KAFKA_TLS_CA                    | Path to the Certificate Authority file     | (required for TLS) |
+| KAFKA_CLIENT_ID                 | Unique identifier for the Kafka client.    | relay-plugin       |
+| KAFKA_maxInFlightRequests       | Max number of unacknowledged requests sent | None               |
 
 ## Usage
 
@@ -165,11 +165,11 @@ Defines the extended configuration structure with optional fields.
 
 ```typescript
 export interface ExtendedConfig {
-  DESTINATION_TRANSPORT_URL: string; // The URL of the Kafka server to connect to
-  PRODUCER_STREAM: string; // The topic to publish messages to
-  KAFKA_TLS_CA: string; // Certificate Authority for TLS
-  CLIENT_ID: string; // Kafka client ID
-  maxInFlightRequests: string; // Maximum requests sent
+  KAFKA_DESTINATION_TRANSPORT_URL: string;
+  KAFKA_PRODUCER_STREAM: string;
+  KAFKA_TLS_CA: string;
+  KAFKA_CLIENT_ID: string;
+  KAFKA_MAX_IN_FLIGHT_REQUESTS: number;
 }
 ```
 

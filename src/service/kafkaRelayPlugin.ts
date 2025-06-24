@@ -10,11 +10,10 @@ import type { ConnectionOptions } from 'tls';
 
 export default class KafkaRelayPlugin implements ITransportPlugin {
   private readonly kafka: Kafka;
-  private producer?: Producer;
+  private readonly producer: Producer;
   private loggerService?: LoggerService;
   private apm?: Apm;
   private readonly configuration: Configuration;
-  private readonly maxInFlight: number;
 
   constructor() {
     // Validate and load configuration
@@ -29,13 +28,9 @@ export default class KafkaRelayPlugin implements ITransportPlugin {
           ca: fs.existsSync(this.configuration.KAFKA_TLS_CA) ? [fs.readFileSync(this.configuration.KAFKA_TLS_CA)] : [],
         };
 
-    const parsedMaxInFlight = Number(process.env.maxInFlightRequests);
-
-    if (!parsedMaxInFlight || !Number.isInteger(parsedMaxInFlight) || parsedMaxInFlight <= 0) {
-      throw new Error(`Invalid or missing 'maxInFlightRequests': ${process.env.maxInFlightRequests}`);
+    if (this.configuration.KAFKA_MAX_IN_FLIGHT_REQUESTS <= 0) {
+      throw new Error(`Invalid or missing 'maxInFlightRequests': ${this.configuration.KAFKA_MAX_IN_FLIGHT_REQUESTS}`);
     }
-
-    this.maxInFlight = parsedMaxInFlight;
 
     this.kafka = new Kafka({
       clientId: this.configuration.KAFKA_CLIENT_ID ?? 'relay-plugin',
@@ -58,13 +53,12 @@ export default class KafkaRelayPlugin implements ITransportPlugin {
       KafkaRelayPlugin.name,
     );
 
-    this.producer = this.kafka.producer({
-      maxInFlightRequests: this.maxInFlight,
-    });
-
     await this.producer.connect();
 
-    this.loggerService?.log(`Kafka producer connected with maxInFlightRequests = ${this.maxInFlight}`, KafkaRelayPlugin.name);
+    this.loggerService?.log(
+      `Kafka producer connected with maxInFlightRequests = ${this.configuration.KAFKA_MAX_IN_FLIGHT_REQUESTS}`,
+      KafkaRelayPlugin.name,
+    );
   }
 
   async relay(data: Uint8Array | string): Promise<void> {
