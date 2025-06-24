@@ -6,6 +6,7 @@ import type { Apm } from '@tazama-lf/frms-coe-lib/lib/services/apm';
 import { validateProcessorConfig } from '@tazama-lf/frms-coe-lib/lib/config/processor.config';
 import * as fs from 'fs';
 import type { ITransportPlugin } from '@tazama-lf/frms-coe-lib/lib/interfaces/relay-service/ITransportPlugin';
+import type { ConnectionOptions } from 'tls';
 
 export default class KafkaRelayPlugin implements ITransportPlugin {
   private readonly kafka: Kafka;
@@ -21,11 +22,11 @@ export default class KafkaRelayPlugin implements ITransportPlugin {
 
     const isDev = !this.configuration.nodeEnv || this.configuration.nodeEnv === 'dev';
 
-    const ssl = isDev
+    const ssl: boolean | ConnectionOptions = isDev
       ? false
       : {
           rejectUnauthorized: false,
-          ca: fs.existsSync(this.configuration.KAFKA_TLS_CA!) ? [fs.readFileSync(this.configuration.KAFKA_TLS_CA!)] : [],
+          ca: fs.existsSync(this.configuration.KAFKA_TLS_CA) ? [fs.readFileSync(this.configuration.KAFKA_TLS_CA)] : [],
         };
 
     const parsedMaxInFlight = Number(process.env.maxInFlightRequests);
@@ -37,8 +38,8 @@ export default class KafkaRelayPlugin implements ITransportPlugin {
     this.maxInFlight = parsedMaxInFlight;
 
     this.kafka = new Kafka({
-      clientId: this.configuration.CLIENT_ID ?? 'relay-plugin',
-      brokers: [this.configuration.DESTINATION_TRANSPORT_URL ?? 'localhost:9092'],
+      clientId: this.configuration.KAFKA_CLIENT_ID ?? 'relay-plugin',
+      brokers: [this.configuration.KAFKA_DESTINATION_TRANSPORT_URL ?? 'localhost:9092'],
       ssl,
       logLevel: logLevel.ERROR,
     });
@@ -49,7 +50,7 @@ export default class KafkaRelayPlugin implements ITransportPlugin {
     this.apm = apm;
 
     this.loggerService?.log(
-      `Initializing Kafka producer for broker: ${this.configuration.DESTINATION_TRANSPORT_URL}`,
+      `Initializing Kafka producer for broker: ${this.configuration.KAFKA_DESTINATION_TRANSPORT_URL}`,
       KafkaRelayPlugin.name,
     );
 
@@ -68,12 +69,12 @@ export default class KafkaRelayPlugin implements ITransportPlugin {
       apmTransaction = this.apm?.startTransaction(KafkaRelayPlugin.name);
       const span = this.apm?.startSpan('relay');
 
-      this.loggerService?.log(`Sending data to Kafka topic: ${this.configuration.PRODUCER_STREAM}`, KafkaRelayPlugin.name);
+      this.loggerService?.log(`Sending data to Kafka topic: ${this.configuration.KAFKA_PRODUCER_STREAM}`, KafkaRelayPlugin.name);
 
       const payload = Buffer.isBuffer(data) ? data.toString() : typeof data === 'string' ? data : JSON.stringify(data);
 
       await this.producer?.send({
-        topic: this.configuration.PRODUCER_STREAM,
+        topic: this.configuration.KAFKA_PRODUCER_STREAM,
         messages: [{ value: payload }],
       });
 
