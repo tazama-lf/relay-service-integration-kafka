@@ -37,10 +37,14 @@ export default class KafkaRelayPlugin implements ITransportPlugin {
     this.maxInFlight = parsedMaxInFlight;
 
     this.kafka = new Kafka({
-      clientId: this.configuration.CLIENT_ID ?? 'relay-plugin',
-      brokers: [this.configuration.DESTINATION_TRANSPORT_URL ?? 'localhost:9092'],
+      clientId: this.configuration.KAFKA_CLIENT_ID ?? 'relay-plugin',
+      brokers: [this.configuration.KAFKA_DESTINATION_TRANSPORT_URL ?? 'localhost:9092'],
       ssl,
       logLevel: logLevel.ERROR,
+    });
+
+    this.producer = this.kafka.producer({
+      maxInFlightRequests: this.configuration.KAFKA_MAX_IN_FLIGHT_REQUESTS,
     });
   }
 
