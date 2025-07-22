@@ -64,7 +64,7 @@ describe('KafkaRelayPlugin', () => {
     it('should use CA for SSL in prod', () => {
       const fakeCert = Buffer.from('FAKE_CA_CERT_CONTENT');
 
-      jest.doMock('fs', () => ({
+      jest.doMock('node:fs', () => ({
         existsSync: jest.fn(() => true),
         readFileSync: jest.fn(() => fakeCert),
       }));
@@ -87,7 +87,7 @@ describe('KafkaRelayPlugin', () => {
     });
 
     it('should use empty CA array if CA file is missing', () => {
-      jest.doMock('fs', () => ({
+      jest.doMock('node:fs', () => ({
         existsSync: jest.fn(() => false),
         readFileSync: jest.fn(),
       }));
