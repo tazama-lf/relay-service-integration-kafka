@@ -1,11 +1,16 @@
 {
   "name": "@tazama-lf/kafka-relay-plugin",
-  "version": "1.0.0",
+  "version": "2.2.0",
+  "description": "Tazama relay-service plug-in for Kafka integration",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
     "dist/**/*"
   ],
+  "publishConfig": {
+    "@tazama-lf:registry": "https://npm.pkg.github.com/",
+    "access": "public"
+  },
   "scripts": {
     "clean": "npx rimraf build node_modules coverage package-lock.json",
     "build": "npx tsc",
@@ -20,11 +25,10 @@
     "prepare": "husky"
   },
   "keywords": [],
-  "author": "Fatima Ali",
+  "author": "Tazama.org",
   "license": "Apache-2.0",
-  "description": "",
   "dependencies": {
-    "@tazama-lf/frms-coe-lib":"5.1.0-rc.7",
+    "@tazama-lf/frms-coe-lib":"5.1.0",
     "dotenv": "^17.2.0",
     "kafkajs": "^2.2.4",
     "tslib": "^2.8.1"
